@@ -24,7 +24,7 @@ Open `index.html` in a browser to run the interactive PoC:
 
 ## Live Demo
 
-👉 [View Demo](https://johny834.github.io/articles-with-ai/)
+👉 [View Demo](https://johny834.github.io/a01-poc/)
 
 ## Affected System
 
