@@ -15,7 +15,7 @@
         }
         
         .container {
-            max-width: 680px;
+            max-width: 700px;
             margin: 0 auto;
             padding: 20px 16px 100px;
         }
@@ -62,7 +62,7 @@
         .search-overlay.active { display: block; }
         
         .search-header {
-            max-width: 680px;
+            max-width: 700px;
             margin: 0 auto;
             display: flex;
             gap: 12px;
@@ -124,68 +124,26 @@
         .feed {
             display: flex;
             flex-direction: column;
-            gap: 1px;
-            background: #222;
-            border-radius: 16px;
-            overflow: hidden;
+            gap: 16px;
             margin-top: 16px;
         }
         
         .article {
-            background: #0a0a0a;
-            padding: 20px;
+            background: #0d0d0d;
+            border: 1px solid #1a1a1a;
+            border-radius: 16px;
+            overflow: hidden;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
         
-        .article:hover { background: #111; }
-        
-        .article-top {
-            display: flex;
-            gap: 16px;
-        }
-        
-        .article-content { flex: 1; min-width: 0; }
-        
-        .article-source {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .article-source .dot { color: #444; }
-        
-        .article-title {
-            font-size: 17px;
-            font-weight: 600;
-            line-height: 1.4;
-            margin-bottom: 8px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .article-summary {
-            font-size: 15px;
-            color: #888;
-            line-height: 1.5;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+        .article:hover { border-color: #333; background: #111; }
         
         .article-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 12px;
-            overflow: hidden;
-            flex-shrink: 0;
+            width: 100%;
+            height: 200px;
             background: #1a1a1a;
+            position: relative;
         }
         
         .article-image img {
@@ -194,18 +152,94 @@
             object-fit: cover;
         }
         
+        .article-source-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .article-body {
+            padding: 20px;
+        }
+        
+        .article-meta {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .article-meta .dot { color: #333; }
+        
+        .article-title {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.35;
+            margin-bottom: 12px;
+        }
+        
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .article-summary {
+            font-size: 15px;
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        
+        /* AI Insights */
+        .ai-insights {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .insight-tag {
+            padding: 6px 12px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .insight-tag.sentiment-positive { border-color: #22c55e33; color: #22c55e; }
+        .insight-tag.sentiment-negative { border-color: #ef444433; color: #ef4444; }
+        .insight-tag.sentiment-neutral { border-color: #3b82f633; color: #3b82f6; }
+        
         .article-stats {
             display: flex;
-            gap: 16px;
-            margin-top: 14px;
-            font-size: 13px;
+            gap: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #1a1a1a;
+            font-size: 14px;
             color: #555;
         }
         
         .stat {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
         
         /* Loading */
@@ -253,6 +287,11 @@
         
         .fab:hover { transform: scale(1.1); }
         .fab.active { background: #ef4444; }
+        
+        @media (max-width: 500px) {
+            .article-image { height: 160px; }
+            .article-title { font-size: 18px; }
+        }
     </style>
 </head>
 <body>
@@ -401,22 +440,64 @@
                 const img = (a.embeds || []).find(e => e.type === 'thumbnail' || e.type === 'image');
                 const time = timeAgo(a.posted_at);
                 
+                // Process AI insights
+                let insightsHtml = '';
+                if (a.ai_insights && a.ai_insights.length > 0) {
+                    const tags = [];
+                    a.ai_insights.forEach(insight => {
+                        // Handle different insight formats
+                        if (insight.sentiment) {
+                            const sentimentClass = insight.sentiment === 'positive' ? 'sentiment-positive' : 
+                                                   insight.sentiment === 'negative' ? 'sentiment-negative' : 'sentiment-neutral';
+                            tags.push(`<span class="insight-tag ${sentimentClass}">📊 ${insight.sentiment}</span>`);
+                        }
+                        if (insight.topic) {
+                            tags.push(`<span class="insight-tag">🏷️ ${esc(insight.topic)}</span>`);
+                        }
+                        if (insight.category) {
+                            tags.push(`<span class="insight-tag">📁 ${esc(insight.category)}</span>`);
+                        }
+                        if (insight.key_point) {
+                            tags.push(`<span class="insight-tag">💡 ${esc(insight.key_point)}</span>`);
+                        }
+                        // Generic key-value handling
+                        Object.keys(insight).forEach(key => {
+                            if (!['sentiment', 'topic', 'category', 'key_point'].includes(key) && typeof insight[key] === 'string') {
+                                tags.push(`<span class="insight-tag">${esc(insight[key])}</span>`);
+                            }
+                        });
+                    });
+                    if (tags.length > 0) {
+                        insightsHtml = `<div class="ai-insights">${tags.slice(0, 5).join('')}</div>`;
+                    }
+                }
+                
+                const imageHtml = img ? `
+                    <div class="article-image">
+                        <img src="${img.url}" alt="" onerror="this.parentElement.style.display='none'">
+                        <span class="article-source-badge">${a.medium}</span>
+                    </div>
+                ` : '';
+                
                 return `
                     <article class="article" onclick="window.open('${a.url}','_blank')">
-                        <div class="article-top">
-                            <div class="article-content">
-                                <div class="article-source">
-                                    ${a.medium} <span class="dot">·</span> @${a.author || 'unknown'} <span class="dot">·</span> ${time}
-                                </div>
-                                <h3 class="article-title">${esc(a.ai_title || 'Untitled')}</h3>
-                                <p class="article-summary">${esc(a.ai_summary || '')}</p>
+                        ${imageHtml}
+                        <div class="article-body">
+                            <div class="article-meta">
+                                ${!img ? `<span>${a.medium}</span><span class="dot">·</span>` : ''}
+                                <span>@${a.author || 'unknown'}</span>
+                                <span class="dot">·</span>
+                                <span>${time}</span>
                             </div>
-                            ${img ? `<div class="article-image"><img src="${img.url}" alt="" onerror="this.parentElement.style.display='none'"></div>` : ''}
-                        </div>
-                        <div class="article-stats">
-                            <span class="stat">❤️ ${a.likes || 0}</span>
-                            <span class="stat">🔄 ${a.reposts || 0}</span>
-                            <span class="stat">💬 ${a.comments_count || 0}</span>
+                            <h2 class="article-title">${esc(a.ai_title || 'Untitled')}</h2>
+                            <span class="ai-badge">✨ AI Summary</span>
+                            <p class="article-summary">${esc(a.ai_summary || 'No summary available')}</p>
+                            ${insightsHtml}
+                            <div class="article-stats">
+                                <span class="stat">❤️ ${a.likes || 0}</span>
+                                <span class="stat">🔄 ${a.reposts || 0}</span>
+                                <span class="stat">💬 ${a.comments_count || 0}</span>
+                            </div>
                         </div>
                     </article>
                 `;
