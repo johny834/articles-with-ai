@@ -1,44 +1,48 @@
-# A01 API Security PoC
+# Articles with AI
 
-> 🔓 Proof of Concept demonstrating authentication bypass vulnerability
+> 📰 AI-powered news feed aggregator
 
-## Overview
+A modern web app that fetches and displays articles from Bluesky and Reddit with AI-generated titles and summaries.
 
-This PoC demonstrates critical security vulnerabilities discovered in the A01 News API backend (`backend-cap10.research-model-y.xyz`).
+## Features
 
-## Vulnerabilities
+- **🏠 News Feed** — Browse latest articles by category
+- **🔍 Search** — Semantic search powered by embeddings
+- **❤️ Favorites** — Save articles for later
+- **📱 Responsive** — Works on desktop and mobile
+- **🤖 AI Summaries** — Every article includes an AI-generated summary
+- **🔄 Auto-auth** — Seamless background authentication
 
-| Severity | Issue |
-|----------|-------|
-| 🔴 **CRITICAL** | Authentication bypass - `/login` accepts ANY credentials |
-| 🟠 **HIGH** | Full API schema exposed at `/docs`, `/redoc`, `/openapi.json` |
-| 🟡 **MEDIUM** | Server version disclosure (uvicorn) |
+## Categories
 
-## Demo
-
-Open `index.html` in a browser to run the interactive PoC:
-
-1. **Authentication Bypass** - Login with any email/password combination
-2. **Access User Data** - Fetch profile data with the obtained token
-3. **Search Articles** - Full API access demonstration
+- Technology, Science, Business, Politics
+- Sports, Entertainment, Health, World
 
 ## Live Demo
 
-👉 [View Demo](https://johny834.github.io/a01-poc/)
+👉 [View Demo](https://johny834.github.io/articles-with-ai/)
 
-## Affected System
+## API
 
-- **API:** `https://backend-cap10.research-model-y.xyz`
-- **App:** A01: Your Personal News Agent (iOS)
-- **App Store ID:** 6745206011
+Powered by the A01 News API (`backend-cap10.research-model-y.xyz`)
 
-## Responsible Disclosure
+### Endpoints Used
 
-This PoC includes a built-in report generator for responsible disclosure purposes.
+| Endpoint | Description |
+|----------|-------------|
+| `POST /authentication/login` | Get access token |
+| `POST /authentication/refresh` | Refresh token |
+| `POST /embeddings/` | Create search embedding |
+| `POST /articles/search` | Search articles |
+| `GET /favorites/` | List favorites |
+| `POST /favorites/{id}` | Add favorite |
+| `DELETE /favorites/{id}` | Remove favorite |
 
-## Disclaimer
+## Tech Stack
 
-This tool is for educational and authorized security testing purposes only. Use responsibly.
+- Vanilla JavaScript (no frameworks)
+- CSS Grid & Flexbox
+- LocalStorage for token persistence
 
 ## License
 
