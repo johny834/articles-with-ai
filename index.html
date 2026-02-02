@@ -20,7 +20,6 @@
             padding: 20px 16px 100px;
         }
         
-        /* Header */
         .header {
             display: flex;
             align-items: center;
@@ -45,7 +44,6 @@
         
         .search-btn:hover { background: #222; color: #fff; }
         
-        /* Search overlay */
         .search-overlay {
             position: fixed;
             inset: 0;
@@ -85,7 +83,6 @@
             cursor: pointer;
         }
         
-        /* Categories */
         .categories {
             display: flex;
             gap: 8px;
@@ -111,7 +108,6 @@
         .cat:hover { border-color: #444; color: #fff; }
         .cat.active { background: #fff; border-color: #fff; color: #000; }
         
-        /* Articles */
         .feed {
             display: flex;
             flex-direction: column;
@@ -128,9 +124,7 @@
         
         .article:hover { border-color: #333; }
         
-        .article-link {
-            cursor: pointer;
-        }
+        .article-link { cursor: pointer; }
         
         .article-image {
             width: 100%;
@@ -196,8 +190,8 @@
             margin-bottom: 16px;
         }
         
-        /* Community Insights */
-        .community-section {
+        /* AI Insights Section */
+        .ai-insights-section {
             margin: 16px 0;
             padding: 16px;
             background: #0a0a0a;
@@ -205,65 +199,86 @@
             border: 1px solid #1a1a1a;
         }
         
-        .community-header {
+        .ai-insights-header {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: #888;
-            margin-bottom: 12px;
-        }
-        
-        .community-header svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-        
-        .insights-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .insight-item {
-            font-size: 14px;
-            color: #777;
-            line-height: 1.5;
-            padding-left: 16px;
-            position: relative;
-        }
-        
-        .insight-item::before {
-            content: '→';
-            position: absolute;
-            left: 0;
-            color: #444;
-        }
-        
-        .insight-label {
-            color: #555;
-            font-size: 11px;
+            color: #666;
+            margin-bottom: 14px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
         }
         
-        .clusters {
+        .sentiment-bars {
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 12px;
+            gap: 8px;
+            margin-bottom: 14px;
         }
         
-        .cluster-tag {
-            padding: 5px 10px;
-            background: #151515;
-            border: 1px solid #252525;
-            border-radius: 6px;
+        .sentiment-bar {
+            height: 4px;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+        
+        .sentiment-bar.positive { background: #22c55e; }
+        .sentiment-bar.negative { background: #ef4444; }
+        .sentiment-bar.neutral { background: #3b82f6; }
+        
+        .sentiment-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .sentiment-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .sentiment-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .sentiment-icon.positive { background: rgba(34, 197, 94, 0.15); }
+        .sentiment-icon.negative { background: rgba(239, 68, 68, 0.15); }
+        .sentiment-icon.neutral { background: rgba(59, 130, 246, 0.15); }
+        
+        .sentiment-content { flex: 1; min-width: 0; }
+        
+        .sentiment-label {
             font-size: 12px;
-            color: #666;
+            font-weight: 600;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sentiment-label.positive { color: #22c55e; }
+        .sentiment-label.negative { color: #ef4444; }
+        .sentiment-label.neutral { color: #3b82f6; }
+        
+        .sentiment-pct {
+            font-size: 11px;
+            color: #555;
+            font-weight: 400;
+        }
+        
+        .sentiment-summary {
+            font-size: 13px;
+            color: #777;
+            line-height: 1.5;
         }
         
         .article-stats {
@@ -281,7 +296,6 @@
             gap: 6px;
         }
         
-        /* Loading */
         .loading {
             text-align: center;
             padding: 60px 20px;
@@ -460,44 +474,64 @@
                 const img = (a.embeds || []).find(e => e.type === 'thumbnail' || e.type === 'image');
                 const time = timeAgo(a.posted_at);
                 
-                // Build community insights section
-                let communityHtml = '';
-                const hasInsights = a.insights_text && Object.keys(a.insights_text).length > 0;
-                const hasClusters = a.comments_clusters && Object.keys(a.comments_clusters).length > 0;
-                
-                if (hasInsights || hasClusters) {
-                    let insightsHtml = '';
+                // Build AI Insights section
+                let insightsHtml = '';
+                if (a.ai_insights && a.ai_insights.length > 0) {
+                    const sentiments = [];
+                    let bars = [];
                     
-                    // Render insights_text
-                    if (hasInsights) {
-                        const items = Object.entries(a.insights_text)
-                            .filter(([k, v]) => v && typeof v === 'string')
-                            .slice(0, 3)
-                            .map(([k, v]) => `<div class="insight-item">${esc(v)}</div>`)
-                            .join('');
-                        if (items) insightsHtml += `<div class="insights-list">${items}</div>`;
-                    }
+                    // Parse ai_insights - it's an array of objects containing sentiment keys
+                    a.ai_insights.forEach(insight => {
+                        // Each insight object can have keys like "positive", "negative", "neutral"
+                        Object.keys(insight).forEach(key => {
+                            const data = insight[key];
+                            if (data && typeof data === 'object' && data.summary) {
+                                const type = data.sentiment || key;
+                                const pct = data.percentage || 0;
+                                
+                                sentiments.push({
+                                    type: type.toLowerCase(),
+                                    summary: data.summary,
+                                    percentage: pct
+                                });
+                                
+                                if (pct > 0) {
+                                    bars.push({ type: type.toLowerCase(), pct });
+                                }
+                            }
+                        });
+                    });
                     
-                    // Render comment clusters as tags
-                    if (hasClusters) {
-                        const tags = Object.entries(a.comments_clusters)
-                            .slice(0, 5)
-                            .map(([topic, comments]) => {
-                                const count = Array.isArray(comments) ? comments.length : 0;
-                                return `<span class="cluster-tag">${esc(topic)}${count ? ` (${count})` : ''}</span>`;
-                            })
-                            .join('');
-                        if (tags) insightsHtml += `<div class="clusters">${tags}</div>`;
-                    }
-                    
-                    if (insightsHtml) {
-                        communityHtml = `
-                            <div class="community-section">
-                                <div class="community-header">
-                                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                                    Community Insights
+                    if (sentiments.length > 0) {
+                        // Build sentiment bars
+                        const barsHtml = bars.length > 0 
+                            ? `<div class="sentiment-bars">${bars.map(b => 
+                                `<div class="sentiment-bar ${b.type}" style="width: ${b.pct}%"></div>`
+                              ).join('')}</div>` 
+                            : '';
+                        
+                        // Build sentiment items
+                        const itemsHtml = sentiments.map(s => {
+                            const icon = s.type === 'positive' ? '👍' : s.type === 'negative' ? '👎' : '➖';
+                            return `
+                                <div class="sentiment-item">
+                                    <div class="sentiment-icon ${s.type}">${icon}</div>
+                                    <div class="sentiment-content">
+                                        <div class="sentiment-label ${s.type}">
+                                            ${s.type.charAt(0).toUpperCase() + s.type.slice(1)}
+                                            ${s.percentage ? `<span class="sentiment-pct">${s.percentage}%</span>` : ''}
+                                        </div>
+                                        <div class="sentiment-summary">${esc(s.summary)}</div>
+                                    </div>
                                 </div>
-                                ${insightsHtml}
+                            `;
+                        }).join('');
+                        
+                        insightsHtml = `
+                            <div class="ai-insights-section">
+                                <div class="ai-insights-header">🧠 AI Insights</div>
+                                ${barsHtml}
+                                <div class="sentiment-items">${itemsHtml}</div>
                             </div>
                         `;
                     }
@@ -524,7 +558,7 @@
                                 <h2 class="article-title">${esc(a.ai_title || 'Untitled')}</h2>
                                 <span class="ai-badge">✨ AI Summary</span>
                                 <p class="article-summary">${esc(a.ai_summary || 'No summary available')}</p>
-                                ${communityHtml}
+                                ${insightsHtml}
                                 <div class="article-stats">
                                     <span class="stat">❤️ ${a.likes || 0}</span>
                                     <span class="stat">🔄 ${a.reposts || 0}</span>
