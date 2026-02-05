@@ -5,58 +5,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Articles with AI</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            color-scheme: dark light;
+            --bg: #0b0c10;
+            --bg-accent: #12131a;
+            --surface: #101218;
+            --surface-2: #151823;
+            --text: #f2f4f8;
+            --muted: #a7adbb;
+            --muted-2: #7d8393;
+            --border: #202431;
+            --border-2: #2a2f3b;
+            --accent: #5b8cff;
+            --accent-2: #7bc6ff;
+            --shadow: 0 14px 40px rgba(0,0,0,0.45);
+        }
+
+        [data-theme="light"] {
+            --bg: #f6f6f2;
+            --bg-accent: #ffffff;
+            --surface: #ffffff;
+            --surface-2: #f1f3f7;
+            --text: #101319;
+            --muted: #4b5563;
+            --muted-2: #6b7280;
+            --border: #e4e7ec;
+            --border-2: #d6dae0;
+            --accent: #2b6df6;
+            --accent-2: #1b9bf0;
+            --shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+        }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000;
-            color: #fff;
+            font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+            background: radial-gradient(1200px 600px at 10% -20%, var(--bg-accent), transparent), var(--bg);
+            color: var(--text);
             min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
         }
         
         .container {
-            max-width: 700px;
+            max-width: 940px;
             margin: 0 auto;
-            padding: 20px 16px 100px;
+            padding: 24px 20px 120px;
         }
         
         .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 0 24px;
-            border-bottom: 1px solid #222;
-            margin-bottom: 8px;
+            padding: 14px 0 22px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
         }
         
-        .logo { font-size: 22px; font-weight: 700; }
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
         
         .search-btn {
             width: 40px;
             height: 40px;
-            background: #111;
-            border: 1px solid #333;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 50%;
-            color: #888;
+            color: var(--muted-2);
             font-size: 18px;
             cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
         }
         
-        .search-btn:hover { background: #222; color: #fff; }
+        .search-btn:hover { border-color: var(--border-2); color: var(--text); }
+
+        .theme-toggle {
+            height: 40px;
+            padding: 0 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+        }
+
+        .theme-toggle:hover { border-color: var(--border-2); color: var(--text); }
         
         .search-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.95);
+            background: rgba(8, 9, 14, 0.9);
             z-index: 100;
             display: none;
             padding: 20px 16px;
+            backdrop-filter: blur(10px);
         }
         
+        [data-theme="light"] .search-overlay {
+            background: rgba(240, 242, 246, 0.92);
+        }
+
         .search-overlay.active { display: block; }
         
         .search-header {
-            max-width: 700px;
+            max-width: 860px;
             margin: 0 auto;
             display: flex;
             gap: 12px;
@@ -65,20 +130,20 @@
         .search-input {
             flex: 1;
             padding: 14px 18px;
-            background: #111;
-            border: 1px solid #333;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            color: #fff;
+            color: var(--text);
             font-size: 16px;
         }
         
-        .search-input:focus { outline: none; border-color: #555; }
+        .search-input:focus { outline: none; border-color: var(--accent); }
         
         .search-close {
             padding: 12px 20px;
             background: none;
             border: none;
-            color: #888;
+            color: var(--muted);
             font-size: 15px;
             cursor: pointer;
         }
@@ -95,42 +160,76 @@
         
         .cat {
             padding: 10px 18px;
-            background: #111;
-            border: 1px solid #222;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 24px;
-            color: #999;
+            color: var(--muted);
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             white-space: nowrap;
+            transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .cat:hover { border-color: #444; color: #fff; }
-        .cat.active { background: #fff; border-color: #fff; color: #000; }
+        .cat:hover { border-color: var(--border-2); color: var(--text); }
+        .cat.active { background: var(--text); border-color: var(--text); color: var(--bg); }
+
+        .cat-close {
+            font-size: 14px;
+            line-height: 1;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: var(--surface-2);
+            color: var(--muted-2);
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .cat-close:hover {
+            color: var(--text);
+            border-color: var(--border-2);
+        }
         
         .feed {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            margin-top: 16px;
+            gap: 20px;
+            margin-top: 18px;
         }
         
         .article {
-            background: #0d0d0d;
-            border: 1px solid #1a1a1a;
-            border-radius: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 22px;
             overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, border-color 0.2s ease;
         }
         
-        .article:hover { border-color: #333; }
+        .article:hover { border-color: var(--border-2); transform: translateY(-2px); }
         
         .article-link { cursor: pointer; }
         
         .article-image {
             width: 100%;
-            height: 200px;
-            background: #1a1a1a;
+            height: 320px;
+            background: var(--surface-2);
             position: relative;
+        }
+
+        .article-image::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35));
+            pointer-events: none;
         }
         
         .article-image img {
@@ -144,25 +243,34 @@
             top: 12px;
             left: 12px;
             padding: 6px 12px;
-            background: rgba(0,0,0,0.75);
+            background: rgba(12, 12, 16, 0.7);
             backdrop-filter: blur(8px);
             border-radius: 8px;
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
         }
+
+        [data-theme="light"] .article-source-badge {
+            background: rgba(255, 255, 255, 0.75);
+            color: #111;
+        }
+
+        [data-theme="light"] .article-image::after {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2));
+        }
         
-        .article-body { padding: 20px; }
+        .article-body { padding: 22px 24px 24px; }
         
         .article-meta {
             font-size: 13px;
-            color: #666;
+            color: var(--muted-2);
             margin-bottom: 10px;
             display: flex;
             gap: 8px;
         }
         
-        .article-meta .dot { color: #333; }
+        .article-meta .dot { color: var(--border-2); }
         
         .article-title {
             font-size: 20px;
@@ -176,16 +284,17 @@
             align-items: center;
             gap: 4px;
             padding: 4px 10px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
             border-radius: 6px;
             font-size: 11px;
             font-weight: 600;
             margin-bottom: 10px;
+            color: #fff;
         }
         
         .article-summary {
             font-size: 15px;
-            color: #aaa;
+            color: var(--muted);
             line-height: 1.6;
             margin-bottom: 16px;
         }
@@ -194,9 +303,9 @@
         .ai-insights-section {
             margin: 16px 0;
             padding: 16px;
-            background: #0a0a0a;
+            background: var(--surface-2);
             border-radius: 12px;
-            border: 1px solid #1a1a1a;
+            border: 1px solid var(--border);
         }
         
         .ai-insights-header {
@@ -205,7 +314,7 @@
             gap: 8px;
             font-size: 12px;
             font-weight: 600;
-            color: #666;
+            color: var(--muted-2);
             margin-bottom: 14px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -271,13 +380,13 @@
         
         .sentiment-pct {
             font-size: 11px;
-            color: #555;
+            color: var(--muted-2);
             font-weight: 400;
         }
         
         .sentiment-summary {
             font-size: 13px;
-            color: #777;
+            color: var(--muted-2);
             line-height: 1.5;
         }
         
@@ -285,9 +394,9 @@
             display: flex;
             gap: 20px;
             padding-top: 16px;
-            border-top: 1px solid #1a1a1a;
+            border-top: 1px solid var(--border);
             font-size: 14px;
-            color: #555;
+            color: var(--muted-2);
         }
         
         .stat {
@@ -299,14 +408,14 @@
         .loading {
             text-align: center;
             padding: 60px 20px;
-            color: #555;
+            color: var(--muted-2);
         }
         
         .spinner {
             width: 24px;
             height: 24px;
-            border: 2px solid #333;
-            border-top-color: #fff;
+            border: 2px solid var(--border-2);
+            border-top-color: var(--text);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 0 auto 16px;
@@ -317,7 +426,7 @@
         .empty {
             text-align: center;
             padding: 80px 20px;
-            color: #444;
+            color: var(--muted-2);
         }
         
         .empty-icon { font-size: 48px; margin-bottom: 16px; }
@@ -328,39 +437,38 @@
             right: 24px;
             width: 56px;
             height: 56px;
-            background: #fff;
+            background: var(--text);
             border: none;
             border-radius: 50%;
             font-size: 24px;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow);
+            color: var(--bg);
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
         }
         
         .fab:hover { transform: scale(1.1); }
-        .fab.active { background: #ef4444; }
+        .fab.active { background: #ef4444; color: #fff; }
         
         @media (max-width: 500px) {
-            .article-image { height: 160px; }
+            .container { padding: 20px 16px 110px; }
+            .article-image { height: 240px; }
             .article-title { font-size: 18px; }
+            .article-body { padding: 20px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <div class="logo">📰 Articles</div>
-            <button class="search-btn" onclick="openSearch()">🔍</button>
+            <div class="logo">Articles</div>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light mode</button>
+                <button class="search-btn" onclick="openSearch()">🔍</button>
+            </div>
         </header>
         
-        <div class="categories" id="categories">
-            <button class="cat active" data-cat="">All</button>
-            <button class="cat" data-cat="technology">Tech</button>
-            <button class="cat" data-cat="science">Science</button>
-            <button class="cat" data-cat="business">Business</button>
-            <button class="cat" data-cat="politics">Politics</button>
-            <button class="cat" data-cat="sports">Sports</button>
-            <button class="cat" data-cat="entertainment">Entertainment</button>
-        </div>
+        <div class="categories" id="categories"></div>
         
         <div class="feed" id="feed"></div>
         <div class="loading" id="loading" style="display:none">
@@ -384,10 +492,60 @@
 
     <script>
         const API = 'https://backend-cap10.research-model-y.xyz';
-        let token = localStorage.getItem('token');
-        let refresh = localStorage.getItem('refresh');
-        let category = '';
-        let showingFavs = false;
+        const DEFAULT_CATEGORIES = [
+            { key: '', label: 'All' },
+            { key: 'technology', label: 'Tech' },
+            { key: 'ai research', label: 'AI Research' },
+            { key: 'stocks', label: 'Stocks' },
+            { key: 'science', label: 'Science' },
+            { key: 'business', label: 'Business' },
+            { key: 'health', label: 'Health' },
+            { key: 'world', label: 'World' },
+            { key: 'climate', label: 'Climate' },
+            { key: 'politics', label: 'Politics' },
+            { key: 'sports', label: 'Sports' },
+            { key: 'entertainment', label: 'Entertainment' }
+        ];
+
+        const state = {
+            token: localStorage.getItem('token'),
+            refresh: localStorage.getItem('refresh'),
+            theme: localStorage.getItem('theme'),
+            activeCategory: '',
+            showingFavs: false,
+            categories: DEFAULT_CATEGORIES,
+            removedCategories: new Set(JSON.parse(localStorage.getItem('removedCategories') || '[]')),
+            searchCategories: new Set(JSON.parse(localStorage.getItem('searchCategories') || '[]'))
+        };
+
+        const els = {
+            feed: document.getElementById('feed'),
+            loading: document.getElementById('loading'),
+            empty: document.getElementById('empty'),
+            categories: document.getElementById('categories'),
+            fab: document.getElementById('fabBtn'),
+            searchOverlay: document.getElementById('searchOverlay'),
+            searchInput: document.getElementById('searchInput'),
+            themeToggle: document.getElementById('themeToggle')
+        };
+
+        function applyTheme(nextTheme) {
+            const root = document.documentElement;
+            state.theme = nextTheme;
+            if (state.theme === 'light') {
+                root.setAttribute('data-theme', 'light');
+            } else {
+                root.removeAttribute('data-theme');
+            }
+            localStorage.setItem('theme', state.theme);
+            if (els.themeToggle) {
+                els.themeToggle.textContent = state.theme === 'light' ? 'Dark mode' : 'Light mode';
+            }
+        }
+
+        function toggleTheme() {
+            applyTheme(state.theme === 'light' ? 'dark' : 'light');
+        }
 
         async function auth() {
             const res = await fetch(`${API}/authentication/login`, {
@@ -396,81 +554,154 @@
                 body: JSON.stringify({ email: `u${Date.now()}@a.ai` })
             });
             const data = await res.json();
-            token = data.access_token;
-            refresh = data.refresh_token;
-            localStorage.setItem('token', token);
-            localStorage.setItem('refresh', refresh);
+            state.token = data.access_token;
+            state.refresh = data.refresh_token;
+            localStorage.setItem('token', state.token);
+            localStorage.setItem('refresh', state.refresh);
         }
 
         async function refreshToken() {
             try {
-                const res = await fetch(`${API}/authentication/refresh?refresh_token=${encodeURIComponent(refresh)}`, { method: 'POST' });
+                const res = await fetch(`${API}/authentication/refresh?refresh_token=${encodeURIComponent(state.refresh)}`, { method: 'POST' });
                 if (!res.ok) throw new Error();
                 const data = await res.json();
-                token = data.access_token;
-                refresh = data.refresh_token;
-                localStorage.setItem('token', token);
-                localStorage.setItem('refresh', refresh);
+                state.token = data.access_token;
+                state.refresh = data.refresh_token;
+                localStorage.setItem('token', state.token);
+                localStorage.setItem('refresh', state.refresh);
             } catch { await auth(); }
         }
 
         async function api(path, opts = {}) {
-            if (!token) await auth();
+            if (!state.token) await auth();
             let res = await fetch(`${API}${path}`, {
                 ...opts,
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...opts.headers }
+                headers: { 'Authorization': `Bearer ${state.token}`, 'Content-Type': 'application/json', ...opts.headers }
             });
             if (res.status === 401) {
                 await refreshToken();
                 res = await fetch(`${API}${path}`, {
                     ...opts,
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...opts.headers }
+                    headers: { 'Authorization': `Bearer ${state.token}`, 'Content-Type': 'application/json', ...opts.headers }
                 });
             }
             return res;
         }
 
+        function setLoading(isLoading) {
+            els.loading.style.display = isLoading ? 'block' : 'none';
+        }
+
+        function setEmpty(isEmpty) {
+            els.empty.style.display = isEmpty ? 'block' : 'none';
+        }
+
+        function setFeed(html) {
+            els.feed.innerHTML = html;
+        }
+
+        function formatCategoryKey(value) {
+            return String(value || '').trim().toLowerCase();
+        }
+
+        function titleCase(label) {
+            return label.replace(/\b\w/g, m => m.toUpperCase());
+        }
+
+        function mergeCategories(base, fromArticles) {
+            const map = new Map();
+            base.forEach(cat => map.set(cat.key, cat));
+            fromArticles.forEach(cat => {
+                if (!map.has(cat.key)) map.set(cat.key, cat);
+            });
+            return Array.from(map.values());
+        }
+
+        function persistCategories() {
+            localStorage.setItem('removedCategories', JSON.stringify(Array.from(state.removedCategories)));
+            localStorage.setItem('searchCategories', JSON.stringify(Array.from(state.searchCategories)));
+        }
+
+        function buildCategories(fromArticles = []) {
+            const searchCats = Array.from(state.searchCategories).map(key => ({ key, label: titleCase(key) }));
+            const merged = mergeCategories(DEFAULT_CATEGORIES, searchCats);
+            const mergedWithApi = mergeCategories(merged, fromArticles);
+            return mergedWithApi.filter(cat => !state.removedCategories.has(cat.key));
+        }
+
+        function extractCategories(articles) {
+            const keys = new Set();
+            articles.forEach(article => {
+                const raw = article.category || article.categories || article.topic || article.topics;
+                if (Array.isArray(raw)) {
+                    raw.forEach(value => keys.add(formatCategoryKey(value)));
+                } else if (raw) {
+                    keys.add(formatCategoryKey(raw));
+                }
+            });
+            return Array.from(keys)
+                .filter(Boolean)
+                .map(key => ({ key, label: titleCase(key) }));
+        }
+
+        function renderCategories(list) {
+            const html = list.map(cat => `
+                <button class="cat ${cat.key === state.activeCategory ? 'active' : ''}" data-cat="${cat.key}">
+                    ${cat.label}
+                    ${cat.key ? `<span class="cat-close" data-action="remove" aria-label="Remove category">×</span>` : ''}
+                </button>
+            `).join('');
+            els.categories.innerHTML = html;
+        }
+
         async function loadArticles(query = '') {
-            document.getElementById('feed').innerHTML = '';
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('empty').style.display = 'none';
+            setFeed('');
+            setLoading(true);
+            setEmpty(false);
 
             try {
-                const q = query || category || 'news';
+                const q = query || state.activeCategory || 'news';
                 const embRes = await api('/embeddings/', { method: 'POST', body: JSON.stringify({ query: q }) });
                 const { embedding } = await embRes.json();
 
                 const body = { query: q, embedding, page_size: 30, mediums: ['bluesky', 'reddit'] };
-                if (category) body.category = category;
+                if (state.activeCategory) body.category = state.activeCategory;
 
                 const res = await api('/articles/search', { method: 'POST', body: JSON.stringify(body) });
                 const { articles } = await res.json();
-                render(articles || []);
+                const list = articles || [];
+
+                const apiCategories = extractCategories(list);
+                state.categories = buildCategories(apiCategories);
+                renderCategories(state.categories);
+
+                render(list);
             } catch (e) {
                 console.error(e);
-                document.getElementById('empty').style.display = 'block';
+                setEmpty(true);
             }
-            document.getElementById('loading').style.display = 'none';
+            setLoading(false);
         }
 
         async function loadFavorites() {
-            document.getElementById('feed').innerHTML = '';
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('empty').style.display = 'none';
+            setFeed('');
+            setLoading(true);
+            setEmpty(false);
 
             try {
                 const res = await api('/favorites/?page=1&page_size=50');
                 const { favorites } = await res.json();
-                render(favorites.map(f => f.article));
-            } catch { document.getElementById('empty').style.display = 'block'; }
-            document.getElementById('loading').style.display = 'none';
+                render((favorites || []).map(f => f.article));
+            } catch {
+                setEmpty(true);
+            }
+            setLoading(false);
         }
 
         function render(articles) {
-            const feed = document.getElementById('feed');
-            if (!articles.length) { document.getElementById('empty').style.display = 'block'; return; }
+            if (!articles.length) { setEmpty(true); return; }
 
-            feed.innerHTML = articles.map(a => {
+            setFeed(articles.map(a => {
                 const img = (a.embeds || []).find(e => e.type === 'thumbnail' || e.type === 'image');
                 const time = timeAgo(a.posted_at);
                 
@@ -568,7 +799,7 @@
                         </div>
                     </article>
                 `;
-            }).join('');
+            }).join(''));
         }
 
         function esc(s) {
@@ -585,39 +816,73 @@
             return Math.floor(s/86400) + 'd';
         }
 
-        document.getElementById('categories').onclick = e => {
-            if (!e.target.classList.contains('cat')) return;
-            document.querySelectorAll('.cat').forEach(c => c.classList.remove('active'));
-            e.target.classList.add('active');
-            category = e.target.dataset.cat;
-            showingFavs = false;
-            document.getElementById('fabBtn').classList.remove('active');
+        els.categories.onclick = e => {
+            const removeBtn = e.target.closest('.cat-close');
+            const catBtn = e.target.closest('.cat');
+            if (!catBtn) return;
+
+            const catKey = catBtn.dataset.cat;
+
+            if (removeBtn && catKey) {
+                state.removedCategories.add(catKey);
+                state.searchCategories.delete(catKey);
+                state.categories = buildCategories(state.categories);
+                persistCategories();
+                if (state.activeCategory === catKey) state.activeCategory = '';
+                renderCategories(state.categories);
+                if (!state.showingFavs) loadArticles();
+                return;
+            }
+
+            state.activeCategory = catKey;
+            state.showingFavs = false;
+            els.fab.classList.remove('active');
+            renderCategories(state.categories);
             loadArticles();
         };
 
         function openSearch() {
-            document.getElementById('searchOverlay').classList.add('active');
-            document.getElementById('searchInput').focus();
+            els.searchOverlay.classList.add('active');
+            els.searchInput.focus();
         }
 
         function closeSearch() {
-            document.getElementById('searchOverlay').classList.remove('active');
-            document.getElementById('searchInput').value = '';
+            els.searchOverlay.classList.remove('active');
+            els.searchInput.value = '';
         }
 
-        document.getElementById('searchInput').onkeypress = e => {
+        function addSearchCategory(query) {
+            const key = formatCategoryKey(query);
+            if (!key) return;
+            state.removedCategories.delete(key);
+            state.searchCategories.add(key);
+            state.categories = buildCategories(state.categories);
+            persistCategories();
+            renderCategories(state.categories);
+        }
+
+        els.searchInput.onkeypress = e => {
             if (e.key === 'Enter') {
                 const q = e.target.value.trim();
-                if (q) { closeSearch(); showingFavs = false; document.getElementById('fabBtn').classList.remove('active'); loadArticles(q); }
+                if (q) {
+                    closeSearch();
+                    state.showingFavs = false;
+                    els.fab.classList.remove('active');
+                    addSearchCategory(q);
+                    loadArticles(q);
+                }
             }
         };
 
         function toggleFavorites() {
-            showingFavs = !showingFavs;
-            document.getElementById('fabBtn').classList.toggle('active', showingFavs);
-            showingFavs ? loadFavorites() : loadArticles();
+            state.showingFavs = !state.showingFavs;
+            els.fab.classList.toggle('active', state.showingFavs);
+            state.showingFavs ? loadFavorites() : loadArticles();
         }
 
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        applyTheme(state.theme || (prefersLight ? 'light' : 'dark'));
+        renderCategories(state.categories);
         loadArticles();
     </script>
 </body>
