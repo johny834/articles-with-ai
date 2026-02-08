@@ -1,4 +1,4 @@
-# Articles with AI
+# (PoC) Articles with AI
 
 > 📰 AI-powered news feed aggregator
 
@@ -24,7 +24,7 @@ A modern web app that fetches and displays articles from Bluesky and Reddit with
 
 ## API
 
-Powered by the A01 News API (`backend-cap10.research-model-y.xyz`)
+Powered by the Bottlecap AI API (`backend-cap10.research-model-y.xyz`)
 
 ### Endpoints Used
 
