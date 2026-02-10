@@ -20,7 +20,7 @@ A modern web app that fetches and displays articles from Bluesky and Reddit with
 
 ## Live Demo
 
-👉 [View Demo](https://johny834.github.io/articles-with-ai/)
+👉 [View Demo](https://johny834.github.io/news)
 
 ## API
 
