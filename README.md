@@ -1,4 +1,4 @@
-# (PoC) Articles with AI
+# (PoC) News with AI
 
 > 📰 AI-powered news feed aggregator
 
